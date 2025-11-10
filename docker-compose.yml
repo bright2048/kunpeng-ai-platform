@@ -1,0 +1,17 @@
+version: '3.3'
+
+services:
+  kunpeng-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kunpeng-ai-platform
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:
+      - kunpeng-network
+
+networks:
+  kunpeng-network:
+    driver: bridge
