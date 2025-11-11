@@ -9,16 +9,24 @@ import Services from "./pages/Services";
 import Industries from "./pages/Industries";
 import Login from "./pages/Login";
 import SpaceBooking from "./pages/SpaceBooking";
+import AccountCenter from "./pages/AccountCenter";
+import BillingCenter from "./pages/BillingCenter";
+import ComputingPower from "./pages/ComputingPower";
+
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/login"} component={Login} />
-       <Route path={"/space-booking"} component={SpaceBooking} />
+      <Route path={"/space-booking"} component={SpaceBooking} />
+      <Route path={"/services/computerpow"} component={ComputingPower} />
+      <Route path={"/account"} component={AccountCenter} />  {/* 新增 */}
+      <Route path={"/billing"} component={BillingCenter} />  {/* 新增 */}
       <Route path={"/services/:category"} component={Services} />
       <Route path={"/industries"} component={Industries} />
       <Route path={"/404"} component={NotFound} />
+      
       {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>

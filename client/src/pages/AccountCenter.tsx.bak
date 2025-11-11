@@ -1,0 +1,202 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import Navbar from "@/components/Navbar";
+import { useState, useEffect } from "react";
+import { User, Mail, Phone, MapPin, Shield, Building } from "lucide-react";
+
+export default function AccountCenter() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      setUser(JSON.parse(userStr));
+    }
+  }, []);
+
+  if (!user) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gray-900 text-white pt-24 p-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <p>请先登录</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gray-900 text-white pt-24 p-8">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8">账号中心</h1>
+
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* 左侧导航 */}
+            <div className="lg:col-span-1">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <Button variant="ghost" className="w-full justify-start">
+                      基本信息
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start">
+                      实名认证
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start">
+                      我的合作伙伴
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start">
+                      收件地址
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start">
+                      普遍项设置
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start">
+                      我的消息
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 右侧内容 */}
+            <div className="lg:col-span-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle>基本信息</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* 华为账号信息 */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">账号信息</h3>
+                      <Button variant="link">前往管理</Button>
+                    </div>
+
+                    <div className="flex items-start gap-6">
+                      <Avatar className="w-20 h-20">
+                        <AvatarImage src="/avatar-placeholder.png" />
+                        <AvatarFallback>
+                          <User className="w-10 h-10" />
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="flex-1 space-y-3">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-gray-400">账号名</Label>
+                            <div className="text-white mt-1">{user.name || user.email}</div>
+                          </div>
+                          <div>
+                            <Label className="text-gray-400">手机号</Label>
+                            <div className="text-white mt-1">
+                              {user.phone || "+86 139***2412"}
+                            </div>
+                          </div>
+                          <div>
+                            <Label className="text-gray-400">邮件地址</Label>
+                            <div className="text-white mt-1">{user.email}</div>
+                          </div>
+                          <div>
+                            <Label className="text-gray-400">密码</Label>
+                            <div className="text-white mt-1">••••••••</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-700 pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">业务信息</h3>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-gray-400">开通时间</Label>
+                          <div className="text-white mt-1">
+                            {new Date(user.created_at || Date.now()).toLocaleString('zh-CN')}
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-gray-400">账号类型</Label>
+                          <div className="text-white mt-1">企业</div>
+                        </div>
+                        <div>
+                          <Label className="text-gray-400">企业名称</Label>
+                          <div className="text-white mt-1">
+                            鲲鹏产业源头创新中心（深圳）有限公司
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-gray-400">职位</Label>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-white">技术部IT总监</span>
+                            <Button variant="link" size="sm" className="h-auto p-0">
+                              修改
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-gray-400">认证信息</Label>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className="text-green-500 border-green-500">
+                              已认证为企业账号
+                            </Badge>
+                            <Button variant="link" size="sm" className="h-auto p-0">
+                              查看或变更认证
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-gray-400">联系地址</Label>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-white">尚未设置联系地址</span>
+                            <Button variant="link" size="sm" className="h-auto p-0">
+                              设置联系地址
+                            </Button>
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-gray-400">应用行业</Label>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-white">人工智能</span>
+                            <Button variant="link" size="sm" className="h-auto p-0">
+                              修改
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* <div className="border-t border-gray-700 pt-6">
+                    <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+                      <p className="text-sm text-gray-300">
+                        如果您不再使用华为云业务，可以将您注册的华为云业务账号进行注销。
+                        注销包括注销华为云业务账号，但不包括注销华为账号。
+                      </p>
+                      <Button variant="outline" className="mt-3">
+                        关闭华为云业务
+                      </Button>
+                    </div>
+                  </div> */}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
