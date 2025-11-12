@@ -1,6 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import { generateToken, authenticateToken } from './middleware/auth.js';
 const router = express.Router();
 const USERS_FILE = path.join(process.cwd(), 'users.json');
 //2025年11月11日添加
@@ -120,10 +121,10 @@ router.post('/register', async (req, res) => {
     // 加密密码
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 创建用户
+    // 创建用户（默认为普通用户）
     const [result] = await db.query(
-      'INSERT INTO users (email, username, password, name) VALUES (?, ?, ?, ?)',
-      [email, username, hashedPassword, username]
+      'INSERT INTO users (email, username, password, name, role) VALUES (?, ?, ?, ?, ?)',
+      [email, username, hashedPassword, username, 'user']
     );
 
     // 标记验证码为已使用
@@ -132,16 +133,26 @@ router.post('/register', async (req, res) => {
       [codes[0].id]
     );
 
-    const token = Buffer.from(`${result.insertId}:${Date.now()}`).toString('base64');
+    // 生成JWT Token
+    const newUser = {
+      id: result.insertId,
+      email,
+      username,
+      name: username,
+      role: 'user',
+    };
+    const token = generateToken(newUser);
 
     res.json({
       success: true,
       message: '注册成功',
       user: {
-        id: result.insertId,
-        email,
-        username,
-        name: username,
+        id: newUser.id,
+        email: newUser.email,
+        username: newUser.username,
+        name: newUser.name,
+        role: newUser.role,
+        isAdmin: false,
       },
       token,
     });
@@ -206,13 +217,22 @@ router.post('/login', async (req, res) => {
 
     const user = users[0];
 
+    // 检查账号是否激活
+    if (user.is_active === false) {
+      return res.status(403).json({ message: '账号已被禁用' });
+    }
+
     // 验证密码
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return res.status(401).json({ message: '密码错误' });
     }
 
-    const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
+    // 生成JWT Token
+    const token = generateToken(user);
+
+    // 更新最后登录时间
+    await db.query('UPDATE users SET last_login_at = NOW() WHERE id = ?', [user.id]);
 
     res.json({
       success: true,
@@ -222,6 +242,8 @@ router.post('/login', async (req, res) => {
         email: user.email,
         username: user.username,
         name: user.name,
+        role: user.role || 'user',
+        isAdmin: user.role === 'admin' || user.role === 'super_admin',
       },
       token,
     });

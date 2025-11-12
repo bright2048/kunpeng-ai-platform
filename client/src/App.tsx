@@ -12,7 +12,8 @@ import SpaceBooking from "./pages/SpaceBooking";
 import AccountCenter from "./pages/AccountCenter";
 import BillingCenter from "./pages/BillingCenter";
 import ComputingPower from "./pages/ComputingPower";
-
+import AdminGPU from "./pages/AdminGPU";
+import AdminUsers from "./pages/AdminUsers";
 
 function Router() {
   return (
@@ -20,17 +21,27 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/login"} component={Login} />
       <Route path={"/space-booking"} component={SpaceBooking} />
-      <Route path={"/services/computerpow"} component={ComputingPower} />
-      <Route path={"/account"} component={AccountCenter} />  {/* 新增 */}
-      <Route path={"/billing"} component={BillingCenter} />  {/* 新增 */}
+
+            {/* 服务页面 */}
+      <Route path={"/services/computing"} component={ComputingPower} />
       <Route path={"/services/:category"} component={Services} />
+      
+      {/* 用户中心 */}
+      <Route path={"/account"} component={AccountCenter} />
+      <Route path={"/billing"} component={BillingCenter} />
+      
+      {/* 管理员后台 */}
+      <Route path={"/admin/gpu"} component={AdminGPU} />
+      <Route path={"/admin/users"} component={AdminUsers} />
+      
+      {/* 其他页面 */}
       <Route path={"/industries"} component={Industries} />
       <Route path={"/404"} component={NotFound} />
       
       {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
-  );
+  );  
 }
 
 // NOTE: About Theme

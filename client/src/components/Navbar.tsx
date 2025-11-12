@@ -48,7 +48,7 @@ export default function Navbar() {
     { name: "软件支撑", href: "/services/software" },
     { name: "模型服务", href: "/services/model" },
     { name: "数据服务", href: "/services/data" },
-    { name: "算力保障", href: "/services/computerpow" },
+    { name: "算力保障", href: "/services/computing" },
     { name: "赋能行业", href: "/industries" },
   ];
 
