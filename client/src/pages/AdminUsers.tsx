@@ -58,7 +58,7 @@ interface User {
   last_login_at: string | null;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 function AdminUsersContent() {
   const [, setLocation] = useLocation();
@@ -68,7 +68,7 @@ function AdminUsersContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  
+
   // 对话框状态
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -90,11 +90,11 @@ function AdminUsersContent() {
     setLoading(true);
     try {
       let url = `${API_BASE_URL}/api/users?`;
-      
+
       if (roleFilter !== 'all') {
         url += `role=${roleFilter}&`;
       }
-      
+
       if (statusFilter !== 'all') {
         url += `isActive=${statusFilter}&`;
       }
@@ -405,7 +405,7 @@ function AdminUsersContent() {
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
-                              {user.last_login_at 
+                              {user.last_login_at
                                 ? new Date(user.last_login_at).toLocaleDateString('zh-CN')
                                 : '从未登录'}
                             </div>

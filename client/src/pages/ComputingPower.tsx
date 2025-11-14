@@ -47,7 +47,7 @@ interface GPUConfig {
 }
 
 // API基础URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 // 每页显示数量
 const ITEMS_PER_PAGE = 40;

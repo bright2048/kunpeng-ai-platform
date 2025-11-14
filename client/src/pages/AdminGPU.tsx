@@ -64,13 +64,13 @@ interface GPUResource {
   description: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';function AdminGPUContent() {
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''; function AdminGPUContent() {
   const [, setLocation] = useLocation();
   const user = getCurrentUser();
   const [loading, setLoading] = useState(true);
   const [gpuList, setGpuList] = useState<GPUResource[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   // 对话框状态
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGPU, setEditingGPU] = useState<GPUResource | null>(null);
@@ -346,11 +346,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';fun
                             <Badge
                               variant={
                                 gpu.status === 'active' ? 'default' :
-                                gpu.status === 'inactive' ? 'destructive' : 'outline'
+                                  gpu.status === 'inactive' ? 'destructive' : 'outline'
                               }
                             >
                               {gpu.status === 'active' ? '可用' :
-                               gpu.status === 'inactive' ? '下线' : '维护中'}
+                                gpu.status === 'inactive' ? '下线' : '维护中'}
                             </Badge>
                           </TableCell>
                           <TableCell>
