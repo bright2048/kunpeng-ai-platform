@@ -42,13 +42,12 @@ export default function Navbar() {
 
   const navigation = [
     { name: "首页", href: "/" },
-    { name: "核心能力", href: "/services/core" },
     { name: "空间支持", href: "/space-booking" },
+    { name: "算力保障", href: "/services/computing" },
     { name: "硬件供给", href: "/services/hardware" },
     { name: "软件支撑", href: "/services/software" },
     { name: "模型服务", href: "/services/model" },
     { name: "数据服务", href: "/services/data" },
-    { name: "算力保障", href: "/services/computing" },
     { name: "赋能行业", href: "/industries" },
   ];
 
@@ -85,15 +84,15 @@ export default function Navbar() {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent">
-                      <span>{user.name || user.email}</span>
-                      {unreadCount > 0 && (
-                        <Badge variant="destructive" className="ml-1 px-1.5 py-0 text-xs">
-                          {unreadCount}
-                        </Badge>
-                      )}
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
+                  <button className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-accent">
+                    <span>{user.name || user.email}</span>
+                    {unreadCount > 0 && (
+                      <Badge variant="destructive" className="ml-1 px-1.5 py-0 text-xs">
+                        {unreadCount}
+                      </Badge>
+                    )}
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>
@@ -105,17 +104,17 @@ export default function Navbar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  
+
                   <DropdownMenuItem onClick={() => setLocation("/account")}>
                     <User className="mr-2 h-4 w-4" />
                     <span>账号中心</span>
                   </DropdownMenuItem>
-                  
+
                   <DropdownMenuItem onClick={() => setLocation("/billing")}>
                     <CreditCard className="mr-2 h-4 w-4" />
                     <span>费用中心</span>
                   </DropdownMenuItem>
-                  
+
                   <DropdownMenuItem onClick={() => setLocation("/notifications")}>
                     <Bell className="mr-2 h-4 w-4" />
                     <div className="flex items-center justify-between flex-1">
@@ -127,14 +126,14 @@ export default function Navbar() {
                       )}
                     </div>
                   </DropdownMenuItem>
-                  
+
                   <DropdownMenuItem onClick={() => setLocation("/tickets")}>
                     <FileText className="mr-2 h-4 w-4" />
                     <span>工单管理</span>
                   </DropdownMenuItem>
-                  
+
                   <DropdownMenuSeparator />
-                  
+
                   <DropdownMenuItem onClick={handleLogout} className="text-red-600">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>退出登录</span>
@@ -176,7 +175,7 @@ export default function Navbar() {
                 </Button>
               </Link>
             ))}
-            
+
             {/* Mobile User Menu */}
             {user ? (
               <>

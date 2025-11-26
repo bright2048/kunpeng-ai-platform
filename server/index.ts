@@ -5,6 +5,7 @@ import authRouter from './auth.js';
 import spaceRouter from './space.js';
 import gpuRouter from './gpu.js';
 import usersRouter from './users.js';
+import hardwareRouter from './hardware.js';
 
 dotenv.config( );
 
@@ -19,6 +20,7 @@ app.use('/api', authRouter);
 app.use('/api/space', spaceRouter);
 app.use('/api/gpu', gpuRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/hardware', hardwareRouter);
 
 // 健康检查
 app.get('/health', (req, res) => {
@@ -37,4 +39,5 @@ app.listen(PORT, () => {
   console.log(`  - http://localhost:${PORT}/api/gpu/resources` );
   console.log(`  - http://localhost:${PORT}/api/gpu/stats` );
   console.log(`  - http://localhost:${PORT}/api/users` );
+  console.log(`  - http://localhost:${PORT}/api/hardware/products` );
 });

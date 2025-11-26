@@ -106,6 +106,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || ''; function AdminGPUConten
   const fetchGPUResources = async () => {
     setLoading(true);
     try {
+      // 如果后端api采用nginx反向代理，则要确保API_BASE_URL的值为空，然后api的访问路径就是相对路径。
       const response = await authFetch(`${API_BASE_URL}/api/gpu/resources`);
       const data = await response.json();
 
