@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { APP_LOGO, APP_TITLE } from "@/const";
-import { Menu, X, User, CreditCard, Bell, FileText, LogOut, ChevronDown } from "lucide-react";
+import { Menu, X, User, CreditCard, Bell, FileText, LogOut, ChevronDown, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 
@@ -131,6 +131,17 @@ export default function Navbar() {
                     <FileText className="mr-2 h-4 w-4" />
                     <span>工单管理</span>
                   </DropdownMenuItem>
+
+                  {/* 管理员菜单 */}
+                  {(user.role === 'admin' || user.role === 'super_admin' || user.is_admin) && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setLocation("/admin")}>
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span>管理中心</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
 
                   <DropdownMenuSeparator />
 

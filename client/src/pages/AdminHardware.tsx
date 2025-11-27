@@ -149,7 +149,13 @@ export default function AdminHardware() {
     }
 
     const userData = JSON.parse(user);
-    if (!userData.is_admin) {
+    
+    // 检查是否是管理员（支持 role 或 is_admin 字段）
+    const isAdmin = userData.role === 'admin' || 
+                   userData.role === 'super_admin' || 
+                   userData.is_admin === true;
+    
+    if (!isAdmin) {
       toast.error("您没有权限访问此页面");
       setLocation("/");
       return;
