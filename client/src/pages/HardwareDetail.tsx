@@ -215,20 +215,20 @@ export default function HardwareDetail() {
                   {(!!product.is_hot ||
                     !!product.is_new ||
                     !!product.is_recommended) && (
-                    <div className="absolute top-4 right-4 flex flex-col gap-2">
-                      {!!product.is_hot && (
-                        <Badge variant="destructive" className="text-sm">
-                          热门
-                        </Badge>
-                      )}
-                      {!!product.is_new && (
-                        <Badge className="text-sm bg-green-500">新品</Badge>
-                      )}
-                      {!!product.is_recommended && (
-                        <Badge className="text-sm bg-orange-500">推荐</Badge>
-                      )}
-                    </div>
-                  )}
+                      <div className="absolute top-4 right-4 flex flex-col gap-2">
+                        {!!product.is_hot && (
+                          <Badge variant="destructive" className="text-sm">
+                            热门
+                          </Badge>
+                        )}
+                        {!!product.is_new && (
+                          <Badge className="text-sm bg-green-500">新品</Badge>
+                        )}
+                        {!!product.is_recommended && (
+                          <Badge className="text-sm bg-orange-500">推荐</Badge>
+                        )}
+                      </div>
+                    )}
 
                   {/* 图片轮播控制 */}
                   {images.length > 1 && (
@@ -256,11 +256,10 @@ export default function HardwareDetail() {
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
-                        className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 ${
-                          currentImageIndex === index
-                            ? "border-blue-500"
-                            : "border-gray-600"
-                        }`}
+                        className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 ${currentImageIndex === index
+                          ? "border-blue-500"
+                          : "border-gray-600"
+                          }`}
                       >
                         <img
                           src={image}
@@ -325,7 +324,7 @@ export default function HardwareDetail() {
                   <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-gray-400">价格:</span>
                     <span className="text-4xl font-bold text-orange-500">
-                      ¥{product.price.toFixed(2)}
+                      ¥{parseFloat(product.price as any).toFixed(2)}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-400">

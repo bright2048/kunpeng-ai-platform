@@ -1,22 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-// @ts-ignore
 import authRouter from './auth.js';
-// @ts-ignore
 import spaceRouter from './space.js';
-// @ts-ignore
 import gpuRouter from './gpu.js';
-// @ts-ignore
 import usersRouter from './users.js';
-// @ts-ignore
 import hardwareRouter from './hardware.js';
-// @ts-ignore
 import billingRouter from './billing.js';
-// @ts-ignore
 import paymentRouter from './payment.js';
-// @ts-ignore
-import uploadRouter from './upload.js';
 
 dotenv.config( );
 
@@ -26,9 +17,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 静态文件服务 - 提供上传的文件访问
-app.use('/uploads', express.static('uploads'));
-
 // API 路由
 app.use('/api', authRouter);
 app.use('/api/space', spaceRouter);
@@ -37,7 +25,6 @@ app.use('/api/users', usersRouter);
 app.use('/api/hardware', hardwareRouter);
 app.use('/api/billing', billingRouter);
 app.use('/api/payment', paymentRouter);
-app.use('/api/upload', uploadRouter);
 
 // 健康检查
 app.get('/health', (req, res) => {
@@ -57,6 +44,6 @@ app.listen(PORT, () => {
   console.log(`  - http://localhost:${PORT}/api/gpu/stats` );
   console.log(`  - http://localhost:${PORT}/api/users` );
   console.log(`  - http://localhost:${PORT}/api/hardware/products` );
-  console.log(`  - http://localhost:${PORT}/api/billing/account` );
-  console.log(`  - http://localhost:${PORT}/api/payment/create-order` );
+  console.log(`  - http://localhost:${PORT}/api/billing` );
+  console.log(`  - http://localhost:${PORT}/api/payment` );  
 });

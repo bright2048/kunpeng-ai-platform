@@ -5,17 +5,8 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import jwt from 'jsonwebtoken'; // 提前导入JWT，避免运行时require
-import dotenv from 'dotenv';
-dotenv.config();
+
 import { fileURLToPath } from 'url';
-
-// ========================================
-// ✅ 使用统一的上传配置模块（如果需要）
-// ========================================
-import { uploadPaths } from './upload-config.js';
-
-
-
 const __filename = fileURLToPath(import.meta.url); // 获取当前文件的绝对路径
 const __dirname = path.dirname(__filename); // 从文件路径推导目录路径
 
@@ -37,17 +28,15 @@ const pool = mysql.createPool(dbConfig);
 // ========================================
 
 // 确保上传目录存在
+const uploadDir = path.join(__dirname, '../uploads');
+const imagesDir = path.join(uploadDir, 'hardware/images');
+const pdfsDir = path.join(uploadDir, 'hardware/pdfs');
 
-// const uploadDir = path.join(__dirname, '..', process.env.UPLOAD_DIR || './client/public/uploads');
-// const imagesDir = path.join(uploadDir, 'hardware/images');
-// const pdfsDir = path.join(uploadDir, 'hardware/pdfs');
-
-// [uploadDir, imagesDir, pdfsDir].forEach(dir => {
-//   if (!fs.existsSync(dir)) {
-//     fs.mkdirSync(dir, { recursive: true });
-//   }
-// });
-// uploadPaths
+[uploadDir, imagesDir, pdfsDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 // 图片上传配置
 const imageStorage = multer.diskStorage({
@@ -112,6 +101,8 @@ const authenticateToken = (req, res, next) => {
       message: '未提供认证令牌'
     });
   }
+
+  const jwt = require('jsonwebtoken');
   const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
@@ -131,47 +122,12 @@ const authenticateToken = (req, res, next) => {
 // ========================================
 const requireAdmin = async (req, res, next) => {
   try {
-    // 检查用户是否已认证
-    if (!req.user || !req.user.id) {
-      console.error('requireAdmin: 用户未认证', req.user);
-      return res.status(401).json({
-        success: false,
-        message: '未认证的用户'
-      });
-    }
-
-    // 查询用户权限
     const [users] = await pool.query(
-      'SELECT is_admin, role FROM users WHERE id = ?',
+      'SELECT is_admin FROM users WHERE id = ?',
       [req.user.id]
     );
 
-    console.log('requireAdmin: 查询用户权限', {
-      userId: req.user.id,
-      found: users.length,
-      user: users[0]
-    });
-
-    if (users.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: '用户不存在'
-      });
-    }
-
-    // 检查管理员权限（支持is_admin字段或role字段）
-    const user = users[0];
-    const isAdmin = user.is_admin === 1 ||
-      user.is_admin === true ||
-      user.role === 'admin' ||
-      user.role === 'super_admin';
-
-    if (!isAdmin) {
-      console.warn('requireAdmin: 用户没有管理员权限', {
-        userId: req.user.id,
-        is_admin: user.is_admin,
-        role: user.role
-      });
+    if (users.length === 0 || !users[0].is_admin) {
       return res.status(403).json({
         success: false,
         message: '需要管理员权限'
@@ -180,7 +136,6 @@ const requireAdmin = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('requireAdmin: 中间件错误', error);
     console.error('验证管理员权限失败:', error);
     res.status(500).json({
       success: false,
@@ -496,19 +451,10 @@ router.put('/products/:id', authenticateToken, requireAdmin, async (req, res) =>
       }
     });
   } catch (error) {
-    console.error('===== 更新产品失败 =====');
-    console.error('1. 产品ID:', req.params.id);
-    console.error('2. 请求数据:', req.body);
-    console.error('3. 错误类型:', error.name);
-    console.error('4. 错误信息:', error.message);
-    console.error('5. 错误堆栈:', error.stack);
+    console.error('更新产品失败:', error);
     res.status(500).json({
       success: false,
-      message: '更新产品失败',
-      debug: process.env.NODE_ENV === 'development' ? {
-        error: error.message,
-        stack: error.stack
-      } : undefined
+      message: '更新产品失败'
     });
   }
 });

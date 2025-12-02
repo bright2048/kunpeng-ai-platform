@@ -10,6 +10,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { toast } from "sonner";
+import Navbar from "@/components/Navbar";
 
 // 硬件产品接口
 interface HardwareProduct {
@@ -44,6 +45,7 @@ interface HardwareProduct {
   is_recommended: boolean;
   view_count: number;
   sales_count: number;
+  created_at?: string;
 }
 
 // 每页显示数量
@@ -231,7 +233,11 @@ export default function HardwareSupply() {
     } else if (sortBy === "sales_count") {
       filtered.sort((a, b) => b.sales_count - a.sales_count);
     } else {
-      filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      filtered.sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return dateB - dateA;
+      });
     }
 
     setFilteredProducts(filtered);
@@ -269,11 +275,10 @@ export default function HardwareSupply() {
         <button
           key={i}
           onClick={() => setCurrentPage(i)}
-          className={`px-3 py-1 rounded ${
-            currentPage === i
-              ? "bg-blue-600 text-white"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-          }`}
+          className={`px-3 py-1 rounded ${currentPage === i
+            ? "bg-blue-600 text-white"
+            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+            }`}
         >
           {i}
         </button>
@@ -352,10 +357,16 @@ export default function HardwareSupply() {
   const showMonitorFilters = category === "monitor";
 
   return (
+    // <>
+    //   <Navbar />
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       {/* 页面标题 */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center mb-8">
+      <Navbar />
+      <div>
+
+      </div>
+      <div className="container bg-gray-900 text-white pt-20">
+        <div className="text-left mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">硬件供给</h1>
           <p className="text-gray-400 text-lg">
             提供优质的国产化硬件设备，支持鲲鹏、飞腾、海光等自主可控芯片
@@ -375,11 +386,10 @@ export default function HardwareSupply() {
                 <button
                   key={cat.value}
                   onClick={() => setCategory(cat.value)}
-                  className={`px-4 py-2 rounded-md transition-colors ${
-                    category === cat.value
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                  }`}
+                  className={`px-4 py-2 rounded-md transition-colors ${category === cat.value
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                    }`}
                 >
                   {cat.label}
                 </button>
@@ -400,11 +410,10 @@ export default function HardwareSupply() {
                     <button
                       key={brand.value}
                       onClick={() => setCpuBrand(brand.value)}
-                      className={`px-4 py-2 rounded-md transition-colors ${
-                        cpuBrand === brand.value
-                          ? "bg-purple-600 hover:bg-purple-700 text-white"
-                          : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                      }`}
+                      className={`px-4 py-2 rounded-md transition-colors ${cpuBrand === brand.value
+                        ? "bg-purple-600 hover:bg-purple-700 text-white"
+                        : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                        }`}
                     >
                       {brand.label}
                     </button>
@@ -422,11 +431,10 @@ export default function HardwareSupply() {
                     <button
                       key={brand.value}
                       onClick={() => setGpuBrand(brand.value)}
-                      className={`px-4 py-2 rounded-md transition-colors ${
-                        gpuBrand === brand.value
-                          ? "bg-green-600 hover:bg-green-700 text-white"
-                          : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                      }`}
+                      className={`px-4 py-2 rounded-md transition-colors ${gpuBrand === brand.value
+                        ? "bg-green-600 hover:bg-green-700 text-white"
+                        : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                        }`}
                     >
                       {brand.label}
                     </button>
@@ -444,11 +452,10 @@ export default function HardwareSupply() {
                     <button
                       key={size.value}
                       onClick={() => setMemorySize(size.value)}
-                      className={`px-4 py-2 rounded-md transition-colors ${
-                        memorySize === size.value
-                          ? "bg-orange-600 hover:bg-orange-700 text-white"
-                          : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                      }`}
+                      className={`px-4 py-2 rounded-md transition-colors ${memorySize === size.value
+                        ? "bg-orange-600 hover:bg-orange-700 text-white"
+                        : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                        }`}
                     >
                       {size.label}
                     </button>
@@ -466,11 +473,10 @@ export default function HardwareSupply() {
                     <button
                       key={size.value}
                       onClick={() => setStorageSize(size.value)}
-                      className={`px-4 py-2 rounded-md transition-colors ${
-                        storageSize === size.value
-                          ? "bg-pink-600 hover:bg-pink-700 text-white"
-                          : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                      }`}
+                      className={`px-4 py-2 rounded-md transition-colors ${storageSize === size.value
+                        ? "bg-pink-600 hover:bg-pink-700 text-white"
+                        : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                        }`}
                     >
                       {size.label}
                     </button>
@@ -491,11 +497,10 @@ export default function HardwareSupply() {
                   <button
                     key={speed.value}
                     onClick={() => setPortSpeed(speed.value)}
-                    className={`px-4 py-2 rounded-md transition-colors ${
-                      portSpeed === speed.value
-                        ? "bg-cyan-600 hover:bg-cyan-700 text-white"
-                        : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                    }`}
+                    className={`px-4 py-2 rounded-md transition-colors ${portSpeed === speed.value
+                      ? "bg-cyan-600 hover:bg-cyan-700 text-white"
+                      : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                      }`}
                   >
                     {speed.label}
                   </button>
@@ -515,11 +520,10 @@ export default function HardwareSupply() {
                   <button
                     key={type.value}
                     onClick={() => setPrintType(type.value)}
-                    className={`px-4 py-2 rounded-md transition-colors ${
-                      printType === type.value
-                        ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                        : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                    }`}
+                    className={`px-4 py-2 rounded-md transition-colors ${printType === type.value
+                      ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                      : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                      }`}
                   >
                     {type.label}
                   </button>
@@ -540,11 +544,10 @@ export default function HardwareSupply() {
                     <button
                       key={size.value}
                       onClick={() => setScreenSize(size.value)}
-                      className={`px-4 py-2 rounded-md transition-colors ${
-                        screenSize === size.value
-                          ? "bg-teal-600 hover:bg-teal-700 text-white"
-                          : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                      }`}
+                      className={`px-4 py-2 rounded-md transition-colors ${screenSize === size.value
+                        ? "bg-teal-600 hover:bg-teal-700 text-white"
+                        : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                        }`}
                     >
                       {size.label}
                     </button>
@@ -561,11 +564,10 @@ export default function HardwareSupply() {
                     <button
                       key={res.value}
                       onClick={() => setResolution(res.value)}
-                      className={`px-4 py-2 rounded-md transition-colors ${
-                        resolution === res.value
-                          ? "bg-lime-600 hover:bg-lime-700 text-white"
-                          : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                      }`}
+                      className={`px-4 py-2 rounded-md transition-colors ${resolution === res.value
+                        ? "bg-lime-600 hover:bg-lime-700 text-white"
+                        : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                        }`}
                     >
                       {res.label}
                     </button>
@@ -585,11 +587,10 @@ export default function HardwareSupply() {
                 <button
                   key={option.value}
                   onClick={() => setSortBy(option.value)}
-                  className={`px-4 py-2 rounded-md transition-colors ${
-                    sortBy === option.value
-                      ? "bg-gray-600 text-white"
-                      : "bg-gray-700 hover:bg-gray-600 text-gray-300"
-                  }`}
+                  className={`px-4 py-2 rounded-md transition-colors ${sortBy === option.value
+                    ? "bg-gray-600 text-white"
+                    : "bg-gray-700 hover:bg-gray-600 text-gray-300"
+                    }`}
                 >
                   {option.label}
                 </button>
@@ -623,8 +624,8 @@ export default function HardwareSupply() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {paginatedProducts.map((product) => {
                 const currentIndex = currentImageIndex[product.id] || 0;
-                const images = product.images && product.images.length > 0 
-                  ? product.images 
+                const images = product.images && product.images.length > 0
+                  ? product.images
                   : ["https://via.placeholder.com/600x400?text=No+Image"];
 
                 return (
@@ -686,11 +687,10 @@ export default function HardwareSupply() {
                               {images.map((_, index) => (
                                 <div
                                   key={index}
-                                  className={`w-1.5 h-1.5 rounded-full ${
-                                    index === currentIndex
-                                      ? "bg-white"
-                                      : "bg-white/50"
-                                  }`}
+                                  className={`w-1.5 h-1.5 rounded-full ${index === currentIndex
+                                    ? "bg-white"
+                                    : "bg-white/50"
+                                    }`}
                                 />
                               ))}
                             </div>
@@ -711,7 +711,7 @@ export default function HardwareSupply() {
                         <div className="flex items-center justify-between mb-3">
                           <div>
                             <span className="text-2xl font-bold text-orange-500">
-                              ¥{product.price.toFixed(2)}
+                              ¥{parseFloat(product.price as any).toFixed(2)}
                             </span>
                           </div>
                           <div className="text-sm text-gray-500">

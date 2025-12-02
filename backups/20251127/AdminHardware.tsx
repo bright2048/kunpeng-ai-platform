@@ -149,13 +149,7 @@ export default function AdminHardware() {
     }
 
     const userData = JSON.parse(user);
-
-    // 检查是否是管理员（支持 role 或 is_admin 字段）
-    const isAdmin = userData.role === 'admin' ||
-      userData.role === 'super_admin' ||
-      userData.is_admin === true;
-
-    if (!isAdmin) {
+    if (!userData.is_admin) {
       toast.error("您没有权限访问此页面");
       setLocation("/");
       return;
@@ -361,7 +355,7 @@ export default function AdminHardware() {
           imageFormData.append("images", file);
         });
 
-        const imageResponse = await fetch("/api/upload/hardware-images", {
+        const imageResponse = await fetch("/api/hardware/upload-images", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -384,7 +378,7 @@ export default function AdminHardware() {
         const pdfFormData = new FormData();
         pdfFormData.append("pdf", pdfFile);
 
-        const pdfResponse = await fetch("/api/upload/hardware-pdf", {
+        const pdfResponse = await fetch("/api/hardware/upload-pdf", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -504,7 +498,7 @@ export default function AdminHardware() {
                         {product.category}
                       </TableCell>
                       <TableCell className="text-orange-500">
-                        ¥{parseFloat(product.price as any).toFixed(2)}
+                        ¥{product.price.toFixed(2)}
                       </TableCell>
                       <TableCell className="text-gray-300">
                         {product.stock}
