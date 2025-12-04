@@ -17,6 +17,16 @@ import billingRouter from './billing.js';
 import paymentRouter from './payment.js';
 // @ts-ignore
 import uploadRouter from './upload.js';
+// @ts-ignore
+import cloudProvidersRouter from './cloud-providers.js';
+// @ts-ignore
+import vouchersRouter from './vouchers.js';
+// @ts-ignore
+import discountsRouter from './discounts.js';
+// @ts-ignore
+import computingOrdersRouter from './computing-orders.js';
+// @ts-ignore
+import ticketsRouter from './tickets.js';
 
 dotenv.config( );
 
@@ -38,6 +48,11 @@ app.use('/api/hardware', hardwareRouter);
 app.use('/api/billing', billingRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/cloud-providers', cloudProvidersRouter);
+app.use('/api/vouchers', vouchersRouter);
+app.use('/api/discounts', discountsRouter);
+app.use('/api/computing/orders', computingOrdersRouter);
+app.use('/api/tickets', ticketsRouter);
 
 // 健康检查
 app.get('/health', (req, res) => {
@@ -59,4 +74,9 @@ app.listen(PORT, () => {
   console.log(`  - http://localhost:${PORT}/api/hardware/products` );
   console.log(`  - http://localhost:${PORT}/api/billing/account` );
   console.log(`  - http://localhost:${PORT}/api/payment/create-order` );
+    console.log(`  - http://localhost:${PORT}/api/cloud-providers` );
+  console.log(`  - http://localhost:${PORT}/api/vouchers/available` );
+  console.log(`  - http://localhost:${PORT}/api/discounts/active` );
+  console.log(`  - http://localhost:${PORT}/api/computing/orders` );
+  console.log(`  - http://localhost:${PORT}/api/tickets` );
 });

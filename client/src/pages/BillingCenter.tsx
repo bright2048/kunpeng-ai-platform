@@ -9,6 +9,8 @@ import Navbar from "@/components/Navbar";
 import { Wallet, CreditCard, Gift, TrendingUp, Clock, CheckCircle, XCircle, Loader2, ShoppingCart, Eye, Cpu, Server } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+// API基础URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 interface AccountInfo {
   balance: number;
@@ -149,7 +151,7 @@ export default function BillingCenter() {
   const fetchAccountInfo = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/billing/account', {
+      const response = await fetch(`${API_BASE_URL}/api/billing/account`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -167,7 +169,7 @@ export default function BillingCenter() {
   // 获取充值配置
   const fetchRechargeConfigs = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/billing/recharge-configs');
+      const response = await fetch(`${API_BASE_URL}/api/billing/recharge-configs`);
       const result = await response.json();
       if (result.success) {
         setRechargeConfigs(result.data);
@@ -181,7 +183,7 @@ export default function BillingCenter() {
   const fetchRechargeRecords = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/billing/recharge-records?page=1&pageSize=10', {
+      const response = await fetch(`${API_BASE_URL}/api/billing/recharge-records?page=1&pageSize=10`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -199,7 +201,7 @@ export default function BillingCenter() {
   const fetchTransactions = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/billing/transactions?page=1&pageSize=20', {
+      const response = await fetch(`${API_BASE_URL}/api/billing/transactions?page=1&pageSize=20`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -232,7 +234,7 @@ export default function BillingCenter() {
   // 处理充值
   const handleRecharge = async () => {
     const amount = selectedAmount || parseFloat(customAmount);
-    
+
     if (!amount || amount <= 0) {
       toast.error('请选择或输入充值金额');
       return;
@@ -241,7 +243,7 @@ export default function BillingCenter() {
     setRecharging(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/billing/recharge', {
+      const response = await fetch(`${API_BASE_URL}/api/billing/recharge`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -257,10 +259,10 @@ export default function BillingCenter() {
       if (result.success) {
         toast.success(result.data.message);
         setRechargeDialogOpen(false);
-        
+
         // 模拟支付成功回调
         setTimeout(async () => {
-          const callbackResponse = await fetch('http://localhost:3001/api/billing/payment-callback', {
+          const callbackResponse = await fetch(`${API_BASE_URL}/api/billing/payment-callback`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -271,7 +273,7 @@ export default function BillingCenter() {
               status: 'success'
             })
           });
-          
+
           const callbackResult = await callbackResponse.json();
           if (callbackResult.success) {
             toast.success(callbackResult.message);
@@ -462,11 +464,10 @@ export default function BillingCenter() {
                             setSelectedAmount(config.amount);
                             setCustomAmount("");
                           }}
-                          className={`relative p-4 rounded-lg border-2 transition-all ${
-                            selectedAmount === config.amount
-                              ? 'border-blue-500 bg-blue-500/10'
-                              : 'border-gray-700 hover:border-gray-600'
-                          }`}
+                          className={`relative p-4 rounded-lg border-2 transition-all ${selectedAmount === config.amount
+                            ? 'border-blue-500 bg-blue-500/10'
+                            : 'border-gray-700 hover:border-gray-600'
+                            }`}
                         >
                           {config.isRecommended && (
                             <Badge className="absolute -top-2 -right-2 bg-red-500">推荐</Badge>
@@ -753,9 +754,8 @@ export default function BillingCenter() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className={`text-lg font-medium ${
-                              tx.type === 'recharge' || tx.type === 'refund' ? 'text-green-500' : 'text-red-500'
-                            }`}>
+                            <div className={`text-lg font-medium ${tx.type === 'recharge' || tx.type === 'refund' ? 'text-green-500' : 'text-red-500'
+                              }`}>
                               {tx.type === 'recharge' || tx.type === 'refund' ? '+' : '-'}
                               ¥{tx.amount.toFixed(2)}
                             </div>
@@ -790,7 +790,7 @@ export default function BillingCenter() {
                 <span className="text-sm text-gray-400">订单状态</span>
                 {getOrderStatusBadge(selectedOrder.status)}
               </div>
-              
+
               <Separator />
 
               {/* 订单信息 */}

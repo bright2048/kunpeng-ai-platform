@@ -20,7 +20,7 @@ const router = express.Router();
  */
 router.post('/create-order', authenticateToken, async (req, res) => {
   const connection = await pool.getConnection();
-  
+
   try {
     const userId = req.user.id;
     const { resourceType, resourceId, quantity, duration, totalAmount, useVoucher = true } = req.body;
@@ -36,7 +36,7 @@ router.post('/create-order', authenticateToken, async (req, res) => {
 
     // 1. 创建订单（这里简化，实际项目中应该有专门的订单表）
     const orderNo = `ORD${Date.now()}${Math.floor(Math.random() * 10000)}`;
-    
+
     let remainingAmount = totalAmount;
     let voucherUsed = 0;
     let balanceUsed = 0;
@@ -44,51 +44,70 @@ router.post('/create-order', authenticateToken, async (req, res) => {
 
     // 2. 如果使用算力券，先尝试使用算力券支付
     if (useVoucher && resourceType === 'gpu_rental') {
-      // 查询可用算力券
+      // 查询可用算力券（从 user_vouchers 表）
       const [vouchers] = await connection.query(
-        `SELECT id, balance FROM compute_vouchers 
-         WHERE user_id = ? AND status = 'active' AND balance > 0 
-         AND (expire_at IS NULL OR expire_at > NOW())
-         ORDER BY expire_at ASC, created_at ASC 
-         FOR UPDATE`,
+        `SELECT 
+           uv.id,
+           v.value as balance,
+           v.type,
+           v.value,
+           v.min_amount,
+           v.max_discount
+         FROM user_vouchers uv
+         JOIN vouchers v ON uv.voucher_id = v.id
+         WHERE uv.user_id = ? 
+           AND uv.status = 'unused' 
+           AND uv.expires_at > NOW()
+         ORDER BY uv.expires_at ASC`,
         [userId]
       );
 
       // 使用算力券
+      // 使用算力券抵扣（新版：一次性使用）
       for (const voucher of vouchers) {
         if (remainingAmount <= 0) break;
 
-        const voucherBalance = parseFloat(voucher.balance);
-        const useAmount = Math.min(voucherBalance, remainingAmount);
+        // 检查最低消费要求
+        if (voucher.min_amount && totalAmount < voucher.min_amount) {
+          continue;
+        }
 
-        // 更新算力券余额
-        const newBalance = voucherBalance - useAmount;
-        const newStatus = newBalance <= 0 ? 'used' : 'active';
+        let useAmount = 0;
 
-        await connection.query(
-          `UPDATE compute_vouchers 
-           SET balance = ?, status = ?, used_at = IF(? = 'used', NOW(), used_at) 
-           WHERE id = ?`,
-          [newBalance, newStatus, newStatus, voucher.id]
-        );
+        // 根据券类型计算抵扣金额
+        if (voucher.type === 'amount') {
+          useAmount = Math.min(voucher.value, remainingAmount);
+        } else if (voucher.type === 'discount') {
+          const discountAmount = totalAmount * (voucher.value / 100);
+          const maxDiscount = voucher.max_discount || discountAmount;
+          useAmount = Math.min(discountAmount, maxDiscount, remainingAmount);
+        } else if (voucher.type === 'free_hours') {
+          useAmount = Math.min(voucher.value, remainingAmount);
+        }
 
-        // 记录使用记录
-        await connection.query(
-          `INSERT INTO voucher_usage_records 
-           (user_id, voucher_id, order_id, amount, usage_type, description) 
-           VALUES (?, ?, NULL, ?, ?, ?)`,
-          [userId, voucher.id, useAmount, resourceType, `订单 ${orderNo} 使用算力券`]
-        );
+        if (useAmount > 0) {
+          // 标记券为已使用
+          await connection.query(
+            `UPDATE user_vouchers 
+             SET status = 'used', used_at = NOW(), used_order_id = ?
+             WHERE id = ?`,
+            [orderNo, voucher.id]
+          );
 
-        voucherUsed += useAmount;
-        remainingAmount -= useAmount;
+          voucherUsed += useAmount;
+          remainingAmount -= useAmount;
 
-        paymentDetails.push({
-          type: 'voucher',
-          voucherId: voucher.id,
-          amount: useAmount
-        });
+          paymentDetails.push({
+            type: 'voucher',
+            voucherId: voucher.id,
+            amount: useAmount
+          });
+        }
       }
+
+
+
+
     }
 
     // 3. 如果还有剩余金额，使用账户余额支付
@@ -206,9 +225,10 @@ router.get('/payment-methods', authenticateToken, async (req, res) => {
     let voucherBalance = 0;
     if (resourceType === 'gpu_rental') {
       const [vouchers] = await pool.query(
-        `SELECT SUM(balance) as total FROM compute_vouchers 
-         WHERE user_id = ? AND status = 'active' AND balance > 0 
-         AND (expire_at IS NULL OR expire_at > NOW())`,
+        `SELECT SUM(v.value) as total 
+         FROM user_vouchers uv
+         JOIN vouchers v ON uv.voucher_id = v.id
+         WHERE uv.user_id = ? AND uv.status = 'unused' AND uv.expires_at > NOW()`,
         [userId]
       );
       voucherBalance = vouchers[0].total ? parseFloat(vouchers[0].total) : 0;

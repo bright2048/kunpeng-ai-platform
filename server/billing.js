@@ -26,6 +26,50 @@ function generateVoucherNo(userId) {
   return `VCH${timestamp}${userPad}`;
 }
 
+
+/**
+ * 创建充值赠送的算力券（使用 user_vouchers 表）
+ */
+async function createRechargeGiftVoucher(connection, userId, giftAmount, rechargeId) {
+  // 1. 查找或创建券模板
+  const voucherCode = `RECHARGE_${giftAmount}`;
+
+  let [vouchers] = await connection.query(
+    'SELECT id FROM vouchers WHERE code = ? LIMIT 1',
+    [voucherCode]
+  );
+
+  let voucherId;
+  if (vouchers.length === 0) {
+    // 创建新的券模板（在这里设置过期时间）✅
+    const [result] = await connection.query(
+      `INSERT INTO vouchers 
+       (code, name, type, value, min_amount, max_discount, cloud_provider_id, cloud_provider_code,
+        total_quantity, used_quantity, valid_from, valid_until, status, description)
+       VALUES (?, ?, 'amount', ?, 0, NULL, NULL, NULL, 999999, 0, NOW(), '2099-12-31 23:59:59', 'active', ?)`,
+      [voucherCode, `充值赠送${giftAmount}元券`, giftAmount, `充值赠送${giftAmount}元`]
+    );
+    voucherId = result.insertId;
+  } else {
+    voucherId = vouchers[0].id;
+  }
+
+  // 2. 为用户创建券（不需要 expires_at 字段）✅
+  const userVoucherCode = `VCH${Date.now()}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+
+  const [uvResult] = await connection.query(
+    `INSERT INTO user_vouchers 
+     (user_id, voucher_id, voucher_code, status, received_at)  -- ✅ 移除 expires_at
+     VALUES (?, ?, ?, 'unused', NOW())`,
+    [userId, voucherId, userVoucherCode]
+  );
+
+  console.log(`[充值赠券] 用户${userId} 获得券: ${userVoucherCode}, ¥${giftAmount}`);
+  return uvResult.insertId;
+}
+
+
+
 // ========================================
 // API路由
 // ========================================
@@ -58,13 +102,22 @@ router.get('/account', authenticateToken, async (req, res) => {
 
     const account = accounts[0];
 
-    // 查询可用算力券
+    // 查询可用算力券（从 user_vouchers 表）
     const [vouchers] = await pool.query(
-      `SELECT id, voucher_no, amount, balance, source_type, expire_at, created_at 
-       FROM compute_vouchers 
-       WHERE user_id = ? AND status = 'active' AND balance > 0 
-       AND (expire_at IS NULL OR expire_at > NOW())
-       ORDER BY expire_at ASC, created_at ASC`,
+      `SELECT 
+     uv.id,
+     uv.voucher_code as voucher_no,
+     v.value as amount,
+     v.value as balance,
+     'recharge_gift' as source_type,
+     v.valid_until as expire_at,
+     uv.received_at as created_at
+   FROM user_vouchers uv
+   JOIN vouchers v ON uv.voucher_id = v.id
+   WHERE uv.user_id = ? 
+     AND uv.status = 'unused' 
+     AND v.valid_until > NOW()
+   ORDER BY v.valid_until ASC, uv.received_at ASC`,
       [userId]
     );
 
@@ -138,7 +191,7 @@ router.get('/recharge-configs', async (req, res) => {
  */
 router.post('/recharge', authenticateToken, async (req, res) => {
   const connection = await pool.getConnection();
-  
+
   try {
     const userId = req.user.id;
     const { amount, paymentMethod = 'alipay' } = req.body;
@@ -199,7 +252,7 @@ router.post('/recharge', authenticateToken, async (req, res) => {
  */
 router.post('/payment-callback', async (req, res) => {
   const connection = await pool.getConnection();
-  
+
   try {
     const { orderNo, transactionId, status } = req.body;
 
@@ -293,17 +346,9 @@ router.post('/payment-callback', async (req, res) => {
     }
 
     // 生成算力券
+    // 生成算力券（使用新的 user_vouchers 表）
     if (giftAmount > 0) {
-      const voucherNo = generateVoucherNo(userId);
-      const expireAt = new Date();
-      expireAt.setFullYear(expireAt.getFullYear() + 1); // 1年有效期
-
-      await connection.query(
-        `INSERT INTO compute_vouchers 
-         (user_id, voucher_no, amount, balance, source_type, source_id, status, expire_at, remark) 
-         VALUES (?, ?, ?, ?, 'recharge_gift', ?, 'active', ?, ?)`,
-        [userId, voucherNo, giftAmount, giftAmount, record.id, expireAt, `充值 ¥${amount} 赠送`]
-      );
+      await createRechargeGiftVoucher(connection, userId, giftAmount, record.id);
     }
 
     await connection.commit();
@@ -456,7 +501,7 @@ router.get('/transactions', authenticateToken, async (req, res) => {
  */
 router.post('/use-voucher', authenticateToken, async (req, res) => {
   const connection = await pool.getConnection();
-  
+
   try {
     const userId = req.user.id;
     const { amount, usageType, orderId, description } = req.body;
@@ -471,14 +516,27 @@ router.post('/use-voucher', authenticateToken, async (req, res) => {
     await connection.beginTransaction();
 
     // 查询可用算力券
-    const [vouchers] = await connection.query(
-      `SELECT id, balance FROM compute_vouchers 
-       WHERE user_id = ? AND status = 'active' AND balance > 0 
-       AND (expire_at IS NULL OR expire_at > NOW())
-       ORDER BY expire_at ASC, created_at ASC 
-       FOR UPDATE`,
+    // 查询可用算力券（从 user_vouchers 表）
+    const [vouchers] = await pool.query(
+      `SELECT 
+         uv.id,
+         uv.voucher_code as voucher_no,
+         v.value as amount,
+         v.value as balance,
+         'recharge_gift' as source_type,
+         uv.expires_at as expire_at,
+         uv.received_at as created_at
+       FROM user_vouchers uv
+       JOIN vouchers v ON uv.voucher_id = v.id
+       WHERE uv.user_id = ? 
+         AND uv.status = 'unused' 
+         AND uv.expires_at > NOW()
+       ORDER BY uv.expires_at ASC, uv.received_at ASC`,
       [userId]
     );
+
+    // 计算算力券总余额
+    const totalVoucherBalance = vouchers.reduce((sum, v) => sum + parseFloat(v.amount), 0);
 
     if (vouchers.length === 0) {
       await connection.rollback();
@@ -497,17 +555,16 @@ router.post('/use-voucher', authenticateToken, async (req, res) => {
       const voucherBalance = parseFloat(voucher.balance);
       const useAmount = Math.min(voucherBalance, remainingAmount);
 
-      // 更新算力券余额
+      --使用券时更新余额
       const newBalance = voucherBalance - useAmount;
-      const newStatus = newBalance <= 0 ? 'used' : 'active';
+      const newStatus = newBalance <= 0 ? 'used' : 'unused';
 
       await connection.query(
-        `UPDATE compute_vouchers 
-         SET balance = ?, status = ?, used_at = IF(? = 'used', NOW(), used_at) 
-         WHERE id = ?`,
-        [newBalance, newStatus, newStatus, voucher.id]
+        `UPDATE user_vouchers 
+   SET balance = ?, status = ?, used_at = IF(? = 'used', NOW(), used_at), order_id = IF(? = 'used', ?, order_id)
+   WHERE id = ?`,
+        [newBalance, newStatus, newStatus, newStatus, orderNo, voucher.id]
       );
-
       // 记录使用记录
       await connection.query(
         `INSERT INTO voucher_usage_records 

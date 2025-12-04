@@ -18,6 +18,10 @@ import HardwareSupply from "./pages/HardwareSupply";
 import HardwareDetail from "./pages/HardwareDetail";
 import AdminHardware from "./pages/AdminHardware";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminVouchers from "./pages/AdminVouchers";
+import AdminDiscounts from "./pages/AdminDiscounts";
+import Tickets from "./pages/Tickets";
+import OrderDetail from "./pages/OrderDetail";
 
 function Router() {
   return (
@@ -35,16 +39,20 @@ function Router() {
       {/* 用户中心 */}
       <Route path={"/account"} component={AccountCenter} />
       <Route path={"/billing"} component={BillingCenter} />
+      <Route path={"/tickets"} component={Tickets} />
 
       {/* 管理员后台 */}
       <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/admin/gpu"} component={AdminGPU} />
       <Route path={"/admin/users"} component={AdminUsers} />
       <Route path={"/admin/hardware"} component={AdminHardware} />
+      <Route path={"/admin/vouchers"} component={AdminVouchers} />
+      <Route path={"/admin/discounts"} component={AdminDiscounts} />
 
       {/* 其他页面 */}
       <Route path={"/industries"} component={Industries} />
       <Route path={"/404"} component={NotFound} />
+      <Route path={"/orders/:id"} component={OrderDetail} />
 
       {/* Final fallback route */}
       <Route component={NotFound} />

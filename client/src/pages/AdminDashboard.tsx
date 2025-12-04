@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLocation } from "wouter";
-import { Cpu, HardDrive, Users, ArrowRight, Shield } from "lucide-react";
+import { Cpu, HardDrive, Users, ArrowRight, Shield, Ticket, Percent } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -65,6 +65,22 @@ export default function AdminDashboard() {
       path: "/admin/hardware",
       gradient: "from-green-600 to-green-800",
       detail: "查看硬件产品"
+    },
+    {
+      title: "算力券管理",
+      description: "管理算力券和赠送",
+      icon: Ticket,
+      path: "/admin/vouchers",
+      gradient: "from-orange-600 to-orange-800",
+      detail: "查看算力券"
+    },
+    {
+      title: "折扣管理",
+      description: "管理产品折扣和活动",
+      icon: Percent,
+      path: "/admin/discounts",
+      gradient: "from-pink-600 to-pink-800",
+      detail: "查看折扣活动"
     }
   ];
 
